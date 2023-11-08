@@ -26,6 +26,7 @@ object Versions {
             class Compose {
                 val activity = "1.8.0"
                 val bom = "2023.03.00"
+                val icons = "1.5.3"
             }
         }
 

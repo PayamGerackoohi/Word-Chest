@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Word Chest</string>
+    <string name="word_search">Word Search</string>
 </resources>

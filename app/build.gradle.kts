@@ -78,6 +78,7 @@ Versions.dependencies {
         implementation("androidx.compose.ui:ui-graphics")
         implementation("androidx.compose.ui:ui-tooling-preview")
         implementation("androidx.compose.material3:material3")
+        implementation("androidx.compose.material:material-icons-extended:${android.compose.icons}")
         implementation("com.airbnb.android:mavericks:$mavericks")
         implementation("com.airbnb.android:mavericks-compose:$mavericks")
         implementation("com.airbnb.android:mavericks-hilt:$mavericks")
@@ -87,6 +88,7 @@ Versions.dependencies {
         testImplementation("androidx.test:runner:${test.android.runner}")
         testImplementation("org.assertj:assertj-core:${test.assertj}")
         testImplementation("io.mockk:mockk-android:${test.mockk}")
+        testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${test.kotlin.coroutine}")
         androidTestImplementation("androidx.test.espresso:espresso-core:${test.espresso}")
         androidTestImplementation(platform("androidx.compose:compose-bom:${android.compose.bom}"))
         androidTestImplementation("androidx.compose.ui:ui-test-junit4")
@@ -125,6 +127,7 @@ tasks.register("jacocoCoverage", JacocoReport::class) {
     val sourceBase = packageName.replace(".", "/")
     val excludes = listOf(
         "$sourceBase/WordChestApplication*",
+        "$sourceBase/data/hilt/**",
         "$sourceBase/data/model/**",
         "$sourceBase/ui/**",
     )

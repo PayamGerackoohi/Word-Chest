@@ -14,7 +14,6 @@ class MainActivityTest {
 
     @Test
     fun pageTest() {
-        rule.onNodeWithText("Hello!")
-            .assertIsDisplayed()
+        rule.onNodeWithText("Word Search").assertIsDisplayed()
     }
 }

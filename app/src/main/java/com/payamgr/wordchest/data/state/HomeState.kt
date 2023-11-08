@@ -2,9 +2,9 @@ package com.payamgr.wordchest.data.state
 
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
+import com.payamgr.wordchest.data.model.Word
 
 data class HomeState(
-    @PersistState val user: String = "",
-) : MavericksState {
-    fun greet() = "Hello${if (user.isBlank()) "" else " $user"}!"
-}
+    @PersistState val search: String = "",
+    @PersistState val words: List<Word> = listOf(),
+) : MavericksState

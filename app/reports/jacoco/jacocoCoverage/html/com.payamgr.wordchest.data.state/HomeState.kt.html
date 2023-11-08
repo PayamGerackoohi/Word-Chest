@@ -2,10 +2,10 @@
 
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
+import com.payamgr.wordchest.data.model.Word
 
-<span class="fc" id="L6">data class HomeState(</span>
-<span class="fc" id="L7">    @PersistState val user: String = &quot;&quot;,</span>
-) : MavericksState {
-<span class="fc bfc" id="L9" title="All 2 branches covered.">    fun greet() = &quot;Hello${if (user.isBlank()) &quot;&quot; else &quot; $user&quot;}!&quot;</span>
-<span class="fc" id="L10">}</span>
+<span class="fc" id="L7">data class HomeState(</span>
+<span class="fc" id="L8">    @PersistState val search: String = &quot;&quot;,</span>
+<span class="fc" id="L9">    @PersistState val words: List&lt;Word&gt; = listOf(),</span>
+<span class="fc" id="L10">) : MavericksState</span>
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
