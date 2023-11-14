@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Word Chest</string>
     <string name="word_search">Word Search</string>
+    <string name="show_word_detail">Show word detail</string>
+    <string name="not_implemented_yet">Not implemented yet!</string>
 </resources>

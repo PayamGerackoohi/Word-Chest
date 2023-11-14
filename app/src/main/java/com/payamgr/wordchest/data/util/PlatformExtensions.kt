@@ -1,5 +1,7 @@
 package com.payamgr.wordchest.data.util
 
+import com.payamgr.wordchest.data.model.Output
+
 fun <T> Iterable<T>.forEachThis(action: T.() -> Unit): Unit = forEach { it.action() }
 
 fun Int.pairPartition(parts: Int): List<Pair<Int, Int>> {
@@ -14,4 +16,13 @@ fun Int.pairPartition(parts: Int): List<Pair<Int, Int>> {
         part -= step
         a to b
     }.reversed()
+}
+
+fun <T> List<T>.addOrTruncate(index: Int, item: T): Output<List<T>> {
+    val currentSize = size
+    if (index < 0 || index > currentSize) {
+        return Output.Error("Invalid operation: index: $index, currentSize: $currentSize")
+    }
+    val list = if (index < currentSize) take(index) else this
+    return Output.Success(list + item)
 }

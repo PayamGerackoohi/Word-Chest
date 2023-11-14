@@ -4,30 +4,33 @@ import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 
-@Preview(showBackground = true, heightDp = 300)
+//private const val SHORT_HEIGHT = 75
+private const val SHORT_HEIGHT = 300
+
+@Preview(showBackground = true, heightDp = SHORT_HEIGHT)
 annotation class SinglePreview
 
 @Preview(
     name = "1-Day",
     showBackground = true,
-    heightDp = 300,
+    heightDp = SHORT_HEIGHT,
 )
 @Preview(
     name = "2-Night",
     showBackground = true,
-    heightDp = 300,
+    heightDp = SHORT_HEIGHT,
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Preview(
     name = "3-Wallpaper",
     showBackground = true,
-    heightDp = 300,
+    heightDp = SHORT_HEIGHT,
     wallpaper = Wallpapers.RED_DOMINATED_EXAMPLE
 )
 @Preview(
     name = "4-Wallpaper-Dark",
     showBackground = true,
-    heightDp = 300,
+    heightDp = SHORT_HEIGHT,
     wallpaper = Wallpapers.RED_DOMINATED_EXAMPLE,
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )

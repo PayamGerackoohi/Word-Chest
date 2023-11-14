@@ -84,7 +84,7 @@ Versions.dependencies {
         implementation("com.airbnb.android:mavericks-compose:$mavericks")
         implementation("com.airbnb.android:mavericks-hilt:$mavericks")
         implementation("com.google.dagger:hilt-android:$hilt")
-        kapt("com.google.dagger:hilt-android-compiler:$hilt")
+        implementation("androidx.navigation:navigation-compose:${android.compose.nav}")
         testImplementation("org.junit.jupiter:junit-jupiter:${test.jUnit}")
         testImplementation("androidx.test:runner:${test.android.runner}")
         testImplementation("org.assertj:assertj-core:${test.assertj}")
@@ -98,6 +98,8 @@ Versions.dependencies {
         androidTestImplementation("com.airbnb.android:mavericks-testing:$mavericks")
         androidTestImplementation("com.airbnb.android:mavericks-mocking:$mavericks")
         androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${test.kotlin.coroutine}")
+        androidTestImplementation("androidx.navigation:navigation-testing:${android.compose.nav}")
+        kapt("com.google.dagger:hilt-android-compiler:$hilt")
         debugImplementation("androidx.compose.ui:ui-tooling")
         debugImplementation("androidx.compose.ui:ui-test-manifest")
     }
@@ -144,7 +146,7 @@ tasks.register("makeTestReport") {
     doLast {
         val folder = "reports"
         val source = "$buildDir/$folder"
-        val destination = "${project.projectDir}/$folder"
+        val destination = "${project.rootDir}/$folder"
         delete(destination)
         copy {
             from(source)
