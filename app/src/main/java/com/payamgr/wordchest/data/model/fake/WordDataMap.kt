@@ -7,6 +7,10 @@ import com.payamgr.wordchest.data.model.Word.Data.Section.Type.*
 import com.payamgr.wordchest.data.model.Word.Data.Section.Definition.*
 import com.payamgr.wordchest.data.model.Word.Data.Section.Definition.Part.Sub.*
 
+/**
+ * In-memory data feed for demonastration, separated for lighter code analysis burden
+ */
+@Suppress("SpellCheckingInspection")
 object WordDataMap {
     fun build(): Map<String, List<Data>> = mapOf(
         "sample" to listOf(

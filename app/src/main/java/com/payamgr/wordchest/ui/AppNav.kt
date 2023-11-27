@@ -3,6 +3,7 @@ package com.payamgr.wordchest.ui
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.payamgr.wordchest.data.model.WordKey
 import com.payamgr.wordchest.ui.page.home.Home
 import com.payamgr.wordchest.ui.page.home.Home.homePage
 import com.payamgr.wordchest.ui.page.worddetail.WordDetail.navigateToWordDetail
@@ -12,18 +13,21 @@ object AppNav {
     @Composable
     fun Host(
         navController: NavHostController,
-        push: (word: String) -> Unit,
+        push: (key: WordKey) -> Unit,
         viewModelBuilder: ViewModelBuilder = ViewModelBuilderImpl(),
     ) {
         NavHost(navController = navController, startDestination = Home.ROUTE) {
             homePage(
                 viewModelBuilder = viewModelBuilder.home(),
                 navigateToWordDetail = { word ->
-                    push(word)
-                    navController.navigateToWordDetail(0)
+                    push(WordKey.Word(word, true))
+                    navController.navigateToWordDetail()
                 },
             )
-            wordDetail(viewModelBuilder = viewModelBuilder.wordDetail())
+            wordDetail(
+                viewModelBuilder = viewModelBuilder.wordDetail(),
+                showWordDetail = push,
+            )
         }
     }
 }

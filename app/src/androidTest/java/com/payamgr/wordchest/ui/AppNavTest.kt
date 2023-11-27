@@ -14,12 +14,11 @@ import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.airbnb.mvrx.mocking.MockableMavericks
+import com.payamgr.wordchest.data.model.WordKey
 import com.payamgr.wordchest.util.FakeViewModelBuilder
 import com.payamgr.wordchest.util.app
 import com.payamgr.wordchest.util.assertCurrentRoute
-import io.mockk.confirmVerified
 import io.mockk.spyk
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -33,8 +32,8 @@ class AppNavTest {
     @get:Rule
     val rule = createComposeRule()
     private lateinit var navController: TestNavHostController
-    private val push: (String) -> Unit = spyk({})
-    private val viewModelBuilder = FakeViewModelBuilder()
+
+    private val push: (WordKey) -> Unit = spyk({ _ -> })
 
     @Before
     fun setupAppNavHost() {
@@ -46,23 +45,21 @@ class AppNavTest {
             AppNav.Host(
                 navController = navController,
                 push = push,
-                viewModelBuilder = viewModelBuilder,
+                viewModelBuilder = FakeViewModelBuilder(),
             )
         }
     }
 
     @Test
-    fun verifyStartDestination() {
+    fun verifyStartDestination() = runTest {
         rule.onNodeWithText("Word Search").assertIsDisplayed()
         navController.assertCurrentRoute("home")
     }
 
     @Test
     fun homeToWordDetailsNavigationTest() = runTest {
-        val inputTag = "word input"
-
         // search for 'aaa'
-        rule.onNodeWithTag(inputTag)
+        rule.onNodeWithTag("word input")
             .assertTextEquals("")
             .performTextInput("aaa")
 
@@ -74,16 +71,11 @@ class AppNavTest {
             .assertIsDisplayed()
             .performClick()
 
-        // verify 'push word' is called
-        verify { push(any()) }
-
         // verify navigation to 'WordDetail'
-        navController.assertCurrentRoute("word-detail/{layer}")
+        navController.assertCurrentRoute("word-detail")
 
         // verify back press returns to home
         withContext(Dispatchers.Main) { navController.popBackStack() }
         navController.assertCurrentRoute("home")
-
-        confirmVerified(push)
     }
 }

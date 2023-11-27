@@ -102,6 +102,7 @@ Versions.dependencies {
         kapt("com.google.dagger:hilt-android-compiler:$hilt")
         debugImplementation("androidx.compose.ui:ui-tooling")
         debugImplementation("androidx.compose.ui:ui-test-manifest")
+        implementation(kotlin("script-runtime"))
     }
 }
 
@@ -141,18 +142,18 @@ tasks.register("jacocoCoverage", JacocoReport::class) {
 }
 
 tasks.register("makeTestReport") {
-//    dependsOn("connectedDebugAndroidTest", "jacocoCoverage")
-    dependsOn("connectedDebugAndroidTest", "koverHtmlReportDebug")
-    doLast {
-        val folder = "reports"
-        val source = "$buildDir/$folder"
-        val destination = "${project.rootDir}/$folder"
-        delete(destination)
-        copy {
-            from(source)
-            into(destination)
-        }
-    }
+    dependsOn("connectedDebugAndroidTest", "jacocoCoverage", "koverHtmlReportDebug")
+//    dependsOn("connectedDebugAndroidTest", "koverHtmlReportDebug")
+//    doLast {
+//        val folder = "reports"
+//        val source = "$buildDir/$folder"
+//        val destination = "${project.rootDir}/$folder"
+//        delete(destination)
+//        copy {
+//            from(source)
+//            into(destination)
+//        }
+//    }
 }
 
 koverReport {

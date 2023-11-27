@@ -4,35 +4,76 @@ import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 
-//private const val SHORT_HEIGHT = 75
 private const val SHORT_HEIGHT = 300
 
 @Preview(showBackground = true, heightDp = SHORT_HEIGHT)
 annotation class SinglePreview
 
+/**
+ * Use `PreviewScratch.kts` at `./scripts/` to generate this annotation
+ */
 @Preview(
-    name = "1-Day",
+    name = "01 - Material Theme - Day",
     showBackground = true,
     heightDp = SHORT_HEIGHT,
 )
 @Preview(
-    name = "2-Night",
+    name = "02 - Material Theme - Night",
     showBackground = true,
     heightDp = SHORT_HEIGHT,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Preview(
-    name = "3-Wallpaper",
-    showBackground = true,
-    heightDp = SHORT_HEIGHT,
-    wallpaper = Wallpapers.RED_DOMINATED_EXAMPLE
-)
-@Preview(
-    name = "4-Wallpaper-Dark",
+    name = "03 - Red Wallpaper - Day",
     showBackground = true,
     heightDp = SHORT_HEIGHT,
     wallpaper = Wallpapers.RED_DOMINATED_EXAMPLE,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Preview(
+    name = "04 - Red Wallpaper - Night",
+    showBackground = true,
+    heightDp = SHORT_HEIGHT,
+    wallpaper = Wallpapers.RED_DOMINATED_EXAMPLE,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Preview(
+    name = "05 - Green Wallpaper - Day",
+    showBackground = true,
+    heightDp = SHORT_HEIGHT,
+    wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE,
+)
+@Preview(
+    name = "06 - Green Wallpaper - Night",
+    showBackground = true,
+    heightDp = SHORT_HEIGHT,
+    wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Preview(
+    name = "07 - Blue Wallpaper - Day",
+    showBackground = true,
+    heightDp = SHORT_HEIGHT,
+    wallpaper = Wallpapers.BLUE_DOMINATED_EXAMPLE,
+)
+@Preview(
+    name = "08 - Blue Wallpaper - Night",
+    showBackground = true,
+    heightDp = SHORT_HEIGHT,
+    wallpaper = Wallpapers.BLUE_DOMINATED_EXAMPLE,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+)
+@Preview(
+    name = "09 - Yellow Wallpaper - Day",
+    showBackground = true,
+    heightDp = SHORT_HEIGHT,
+    wallpaper = Wallpapers.YELLOW_DOMINATED_EXAMPLE,
+)
+@Preview(
+    name = "10 - Yellow Wallpaper - Night",
+    showBackground = true,
+    heightDp = SHORT_HEIGHT,
+    wallpaper = Wallpapers.YELLOW_DOMINATED_EXAMPLE,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 annotation class ThemesPreview
 

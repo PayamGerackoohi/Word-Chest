@@ -23,8 +23,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -32,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -52,6 +51,7 @@ import com.payamgr.wordchest.R
 import com.payamgr.wordchest.data.model.Word
 import com.payamgr.wordchest.data.state.HomeState
 import com.payamgr.wordchest.data.util.StringUtil
+import com.payamgr.wordchest.ui.modules.WordChest
 import com.payamgr.wordchest.ui.preview.SinglePreview
 import com.payamgr.wordchest.ui.theme.WordChestTheme
 import com.payamgr.wordchest.ui.util.PathBuilderUtil
@@ -67,18 +67,18 @@ fun HomePagePreview() {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Mavericks.initialize(LocalContext.current)
             val state = HomeState(
-                search = StringUtil.randomString(50),
+                search = StringUtil.randomString(50, false),
                 words = listOf(
-                    Word("a", StringUtil.randomString(10)),
+                    Word("a", StringUtil.randomString(10, false)),
                     Word(
-                        StringUtil.randomString(50),
-                        StringUtil.randomString(50)
+                        StringUtil.randomString(50, false),
+                        StringUtil.randomString(50, false)
                     ),
                 ),
             )
             Home.Page(
                 onItemClick = {},
-                viewModel = object : HomeViewModel(state) {
+                viewModel = object : HomeVM(state) {
                     override fun onSearchChanged(search: String) {}
                 }
             )
@@ -92,7 +92,7 @@ object Home {
 
     fun NavGraphBuilder.homePage(
         navigateToWordDetail: (word: String) -> Unit,
-        viewModelBuilder: @Composable () -> HomeViewModel,
+        viewModelBuilder: @Composable () -> HomeVM,
     ) {
         composable(ROUTE) {
             Page(onItemClick = navigateToWordDetail, viewModel = viewModelBuilder())
@@ -100,7 +100,7 @@ object Home {
     }
 
     @Composable
-    fun Page(onItemClick: (word: String) -> Unit, viewModel: HomeViewModel = mavericksViewModel()) {
+    fun Page(onItemClick: (word: String) -> Unit, viewModel: HomeVM = mavericksViewModel()) {
         val state by viewModel.collectAsState()
         val snackbarState = remember { SnackbarHostState() }
         val scope = rememberCoroutineScope()
@@ -142,7 +142,7 @@ object Home {
                     )
                 }
             },
-            colors = TopAppBarDefaults.smallTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 actionIconContentColor = Color.Red,
@@ -153,22 +153,12 @@ object Home {
     @Composable
     fun WordInput(search: String, onSearchChanged: (String) -> Unit) {
         Surface(color = MaterialTheme.colorScheme.primary) {
-            TextField(
-                value = search,
-                onValueChange = onSearchChanged,
-                textStyle = MaterialTheme.typography.titleMedium,
-                singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    textColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                    focusedIndicatorColor = Color.Red,
-                ),
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            WordChest.WordInput(
+                search = search,
+                onSearchChanged = onSearchChanged,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .testTag("word input")
                     .innerShadow(
                         pathBuilder = PathBuilderUtil.topRound(16.dp),
                         offset = LocalDensity.current.run { Offset(0f, 1.dp.toPx()) },
@@ -195,12 +185,14 @@ object Home {
         Card(elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(shape = RoundedCornerShape(16.dp))
                 .clickable(onClickLabel = stringResource(R.string.show_word_detail)) { onItemClick() }
                 .clearAndSetSemantics {
                     contentDescription = "${word.value}: ${word.shortDescription}"
                 }) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(16.dp)
             ) {
                 Text(
                     word.value,

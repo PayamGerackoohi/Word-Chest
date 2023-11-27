@@ -59,12 +59,12 @@ class PlatformExtensionsKtTest {
 
         val list = listOf(1, 2, 3)
         listOf(
-            Data(-1, 4, Output.Error("Invalid operation: index: -1, currentSize: 3")),
+            Data(-1, 4, Output.Error("Invalid operation: index: -1, size: 3")),
             Data(0, 4, Output.Success(listOf(4))),
             Data(1, 4, Output.Success(listOf(1, 4))),
             Data(2, 4, Output.Success(listOf(1, 2, 4))),
             Data(3, 4, Output.Success(listOf(1, 2, 3, 4))),
-            Data(4, 4, Output.Error("Invalid operation: index: 4, currentSize: 3")),
+            Data(4, 4, Output.Error("Invalid operation: index: 4, size: 3")),
         ).forEachThis {
             assertThat(list.addOrTruncate(index, item))
                 .`as`("%s", this)

@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     AppNav.Host(
                         navController = rememberNavController(),
-                        push = { word -> lifecycleScope.launch { repository.push(0, word) } },
+                        push = { key -> lifecycleScope.launch { repository.push(key) } },
                     )
                 }
             }

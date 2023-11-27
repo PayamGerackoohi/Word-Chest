@@ -25,7 +25,7 @@ object Versions {
 
             class Compose {
                 val activity = "1.8.0"
-                val bom = "2023.03.00"
+                val bom = "2023.10.01"
                 val icons = "1.5.3"
                 val nav = "2.7.5"
             }

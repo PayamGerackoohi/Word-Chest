@@ -25,14 +25,16 @@ class HomeViewModelTest {
     fun searchForTest() = runTest {
         MockableMavericks.initialize(app)
         val repository = spyk(FakeRepository())
-        val viewModel = HomeViewModelImpl(HomeState(), repository)
+        val viewModel = HomeVMImpl(HomeState(), repository, 0L)
 
         // Check initial state
         assertThat(viewModel.awaitState()).isEqualTo(HomeState())
 
         // Search
         viewModel.onSearchChanged("aaa")
-        assertThat(viewModel.awaitState()).isEqualTo(HomeState("aaa"))
+        val state = viewModel.awaitState()
+        assertThat(state.search).isEqualTo("aaa")
+        assertThat(state.words).hasSize(3)
         coVerify { repository.searchFor(any()) }
 
         confirmVerified(repository)
