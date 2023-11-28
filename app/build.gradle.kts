@@ -12,6 +12,14 @@ val packageName = "com.payamgr.wordchest"
 jacoco { toolVersion = Versions.dependencies.test.jacoco }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("../keystore/test")
+            storePassword = "123456"
+            keyPassword = "123456"
+            keyAlias = "test"
+        }
+    }
     namespace = packageName
     compileSdk = 34
 
@@ -31,8 +39,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     Versions.apply {

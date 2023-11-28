@@ -37,15 +37,13 @@ class HistoryListTest {
         }
         // verify initial state
         rule.onNodeWithTag("history list")
-            .assertExists()
-            .assertIsNotDisplayed()
-            .onChildren()
-            .assertCountEquals(0)
+            .assertDoesNotExist()
 
         // verify expansion state
         expand = true
 
         rule.onNodeWithTag("history list")
+            .assertExists()
             .assertIsDisplayed()
             .onChildren()
             .assertCountEquals(3)

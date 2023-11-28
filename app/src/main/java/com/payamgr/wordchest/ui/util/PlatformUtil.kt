@@ -18,6 +18,8 @@ suspend fun BottomSheetScaffoldState.openIfHidden() = bottomSheetState.apply {
 
 val BottomSheetScaffoldState.isHidden get() = bottomSheetState.currentValue == SheetValue.Hidden
 
+val BottomSheetScaffoldState.isGoingToHide get() = bottomSheetState.targetValue == SheetValue.Hidden
+
 suspend fun BottomSheetScaffoldState.hide() = bottomSheetState.hide()
 
 @Composable

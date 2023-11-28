@@ -3,6 +3,11 @@ package com.payamgr.wordchest.ui.page.worddetail
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.BottomSheetScaffold
@@ -84,7 +90,7 @@ import com.payamgr.wordchest.ui.modules.WordChest
 import com.payamgr.wordchest.ui.preview.SinglePreview
 import com.payamgr.wordchest.ui.util.bottomSheetPeek
 import com.payamgr.wordchest.ui.util.hide
-import com.payamgr.wordchest.ui.util.isHidden
+import com.payamgr.wordchest.ui.util.isGoingToHide
 import com.payamgr.wordchest.ui.util.openIfHidden
 import com.payamgr.wordchest.ui.util.rememberHidableBottomSheetScaffoldState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -106,6 +112,36 @@ fun WordDetailPage_Preview() {
                         override val details = MutableStateFlow(words)
                         override suspend fun push(key: WordKey) {}
                         override suspend fun pop(): Boolean = true
+                        override suspend fun searchFor(word: String) =
+                            (1..word.length).map { Word("$word - $it", "") }
+                    }, 500L
+                ),
+                showWordDetail = {},
+            )
+        }
+    }
+}
+
+@SinglePreview
+@Composable
+fun WordDetailPage_historyAnimationTest_Preview() {
+    WordChestTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Mavericks.initialize(LocalContext.current)
+            WordDetail.Page(
+                viewModel = WordDetailVMImpl(
+                    WordDetailState(), repository = object : WordRepository {
+                        private val words = FakeWord().wordData
+                        override val wordHistory = MutableStateFlow(List(20) { "$it$it$it" })
+                        override val currentLayer = MutableStateFlow(2)
+                        override val currentWord = MutableStateFlow("")
+                        override val details = MutableStateFlow(words)
+                        override suspend fun push(key: WordKey) {}
+                        override suspend fun pop(): Boolean {
+                            wordHistory.value = wordHistory.value.dropLast(1)
+                            return true
+                        }
+
                         override suspend fun searchFor(word: String) =
                             (1..word.length).map { Word("$word - $it", "") }
                     }, 500L
@@ -202,7 +238,7 @@ object WordDetail {
             }) {
             val bottomPadding by animateDpAsState(
                 label = "bottomPadding",
-                targetValue = if (searchSectionState.isHidden) 0.dp else it.calculateBottomPadding()
+                targetValue = if (searchSectionState.isGoingToHide) 0.dp else it.calculateBottomPadding()
             )
             PageContent(
                 data = state.data,
@@ -238,48 +274,93 @@ object WordDetail {
         modifier: Modifier = Modifier,
         layer: Int,
     ) {
-        Box(modifier = modifier) {
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.testTag("word data list")
-            ) {
-                items(data.size) { index ->
-                    WordData(
-                        data[index],
-                        indexAt(data.size, index),
-                        searchFor = searchFor,
+        Box {
+            WordDataList(
+                data = data,
+                searchFor = searchFor,
+                modifier = modifier,
+            )
+            val hasHistory = historyActions.list.isNotEmpty()
+            HistoryButton(
+                hasHistory = hasHistory,
+                historyActions = historyActions,
+            )
+            HistoryList(
+                historyActions = historyActions,
+                layer = layer,
+                hasHistory = hasHistory,
+            )
+        }
+    }
+
+    @Composable
+    private fun HistoryList(
+        historyActions: HistoryActions,
+        layer: Int,
+        hasHistory: Boolean,
+    ) {
+        AnimatedVisibility(
+            visible = hasHistory,
+            exit = slideOutHorizontally(targetOffsetX = { -it }),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box {
+                History.List(
+                    expand = historyActions.show,
+                    list = historyActions.list,
+                    currentLayer = layer,
+                    onItemClicked = { layer -> historyActions.onClicked(layer) },
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = .5f)
+                        .align(Alignment.BottomStart)
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun HistoryButton(hasHistory: Boolean, historyActions: HistoryActions) {
+        AnimatedVisibility(
+            visible = hasHistory,
+            enter = fadeIn() + expandIn(expandFrom = Alignment.CenterStart),
+            exit = shrinkOut(shrinkTowards = Alignment.CenterStart) + fadeOut(),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box {
+                FloatingActionButton(
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    onClick = historyActions.toggleShow,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.History,
+                        contentDescription = "Show/Hide History",
                     )
                 }
             }
-            AnimatedVisibility(
-                visible = historyActions.list.isNotEmpty(),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                Box {
-                    History.List(
-                        expand = historyActions.show,
-                        list = historyActions.list,
-                        currentLayer = layer,
-                        onItemClicked = { layer -> historyActions.onClicked(layer) },
-                        modifier = Modifier
-                            .fillMaxWidth(fraction = .5f)
-                            .align(Alignment.BottomStart)
-                    )
-                    FloatingActionButton(
-                        shape = CircleShape,
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        onClick = historyActions.toggleShow,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .align(Alignment.BottomEnd)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = "Show/Hide History",
-                        )
-                    }
-                }
+        }
+    }
+
+    @Composable
+    private fun WordDataList(
+        data: List<Word.Data>,
+        searchFor: (word: String) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = modifier.testTag("word data list")
+        ) {
+            items(data.size) { index ->
+                WordData(
+                    data[index],
+                    indexAt(data.size, index),
+                    searchFor = searchFor,
+                )
             }
         }
     }
@@ -300,6 +381,7 @@ object WordDetail {
                     onWordChanged = onWordChanged,
                     onFirstItem = onFirstItem,
                     onClose = onClose,
+                    showDetail = { if (list.isNotEmpty()) onItemClick(list.first().value) }
                 )
             }
             items(list) { (value) ->
@@ -342,12 +424,19 @@ object WordDetail {
         onWordChanged: (String) -> Unit,
         onFirstItem: (height: Int) -> Unit,
         onClose: () -> Unit,
+        showDetail: () -> Unit,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .onGloballyPositioned { onFirstItem(it.size.height) }
                 .padding(bottom = 16.dp)
         ) {
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close Search Section",
+                )
+            }
             WordChest.WordInput(
                 search = word,
                 onSearchChanged = onWordChanged,
@@ -358,16 +447,12 @@ object WordDetail {
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                 ),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp),
+                modifier = Modifier.weight(1f)
             )
-            IconButton(
-                onClick = onClose, modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
+            IconButton(onClick = showDetail) {
                 Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close Search Section",
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "Show Word Detail",
                 )
             }
         }

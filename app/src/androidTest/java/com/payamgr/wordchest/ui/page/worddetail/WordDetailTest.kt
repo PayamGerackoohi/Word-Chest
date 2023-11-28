@@ -154,13 +154,16 @@ class WordDetailTest {
     fun searchSectionHeader_Test() {
         var word by mutableStateOf("aaa")
         val onClose = mockk<() -> Unit>()
+        val showDetail = mockk<() -> Unit>()
         justRun { onClose() }
+        justRun { showDetail() }
         rule.setContent {
             WordDetail.SearchSectionHeader(
                 word = word,
                 onWordChanged = { word = it },
                 onFirstItem = {},
-                onClose = onClose
+                onClose = onClose,
+                showDetail = showDetail,
             )
         }
 
@@ -179,7 +182,13 @@ class WordDetailTest {
             .performClick()
         verify { onClose() }
 
-        confirmVerified(onClose)
+        // verify "Show Word Detail" button functionality
+        rule.onNodeWithContentDescription("Show Word Detail")
+            .assertIsDisplayed()
+            .performClick()
+        verify { showDetail() }
+
+        confirmVerified(onClose, showDetail)
     }
 
     @Test
@@ -200,7 +209,7 @@ class WordDetailTest {
     @Test
     fun searchSection_Test() {
         var word by mutableStateOf("aaa")
-        var list by mutableStateOf(listOf<Word>())
+        var list by mutableStateOf(listOf(Word("aaa-1", "")))
         val onClose = mockk<() -> Unit>()
         val onItemClick = mockk<(String) -> Unit>()
         justRun { onClose() }
@@ -221,19 +230,32 @@ class WordDetailTest {
         rule.onNodeWithTag("search section")
             .assertIsDisplayed()
             .onChildren()
-            .assertCountEquals(2)
+            .assertCountEquals(4)
             .apply {
+                // verify the close button
+                onFirst().assertContentDescriptionEquals("Close Search Section")
+                    .assertIsDisplayed()
+                    .performClick()
+                verify { onClose() }
+
                 // verify the word input
-                onFirst()
+                this[1]
                     .assert(hasTestTag("word input"))
                     .assertIsDisplayed()
                     .assertTextEquals("aaa")
 
-                // verify the close button
-                this[1].assertContentDescriptionEquals("Close Search Section")
+                // verify the "Show Word Detail" button
+                this[2].assertContentDescriptionEquals("Show Word Detail")
                     .assertIsDisplayed()
                     .performClick()
-                verify { onClose() }
+                verify(exactly = 1) { onItemClick("aaa-1") }
+
+                // verify the search result item
+                this[3].assert(hasTestTag("search section item"))
+                    .assertIsDisplayed()
+                    .assertContentDescriptionEquals("aaa-1")
+                    .performClick()
+                verify(exactly = 2) { onItemClick("aaa-1") }
             }
 
         // verify inserting 'bbb' changes word
@@ -247,9 +269,10 @@ class WordDetailTest {
         rule.onNodeWithTag("search section")
             .assertIsDisplayed()
             .onChildren()
-            .assertCountEquals(3)
+            .assertCountEquals(4)
             .apply {
-                this[2]
+                this[3]
+                    .assert(hasTestTag("search section item"))
                     .assertIsDisplayed()
                     .assertContentDescriptionEquals("bbb")
                     .performClick()
@@ -294,11 +317,7 @@ class WordDetailTest {
 
         // verify history list is still not shown, even if has any item
         historyList = listOf("aa", "bb", "cc")
-        rule.onNodeWithTag("history list")
-            .assertExists()
-            .assertIsDisplayed()
-            .onChildren()
-            .assertCountEquals(0)
+        rule.onNodeWithTag("history list").assertDoesNotExist()
 
         // verify history is shown if showHistory is also true
         showHistory = true
@@ -320,11 +339,7 @@ class WordDetailTest {
 
         // verify toggling show history
         rule.onNodeWithContentDescription("Show/Hide History").performClick()
-        rule.onNodeWithTag("history list")
-            .assertExists()
-            .assertIsDisplayed()
-            .onChildren()
-            .assertCountEquals(0)
+        rule.onNodeWithTag("history list").assertDoesNotExist()
         assertThat(showHistory).isFalse
 
         // verify click to search functionality
@@ -349,7 +364,7 @@ class WordDetailTest {
             .assertExists()
             .assertIsNotDisplayed()
             .onChildren()
-            .assertCountEquals(2)
+            .assertCountEquals(3)
     }
 
     @Test
@@ -449,13 +464,8 @@ class WordDetailTest {
             )
         }
         // verify initial state
-        rule.onNodeWithContentDescription("Show/Hide History")
-            .assertIsDisplayed()
-        rule.onNodeWithTag("history list")
-            .assertExists()
-            .assertIsDisplayed()
-            .onChildren()
-            .assertCountEquals(0)
+        rule.onNodeWithContentDescription("Show/Hide History").assertIsDisplayed()
+        rule.onNodeWithTag("history list").assertDoesNotExist()
 
         // click on history button
         rule.onNodeWithContentDescription("Show/Hide History")
@@ -480,10 +490,7 @@ class WordDetailTest {
         verify { showWordDetail(WordKey.Layer(1)) }
 
         // verify the history list is closed
-        rule.onNodeWithTag("history list")
-            .assertIsDisplayed()
-            .onChildren()
-            .assertCountEquals(0)
+        rule.onNodeWithTag("history list").assertDoesNotExist()
 
         // open the history list
         rule.onNodeWithContentDescription("Show/Hide History").performClick()
@@ -500,10 +507,7 @@ class WordDetailTest {
         rule.onNodeWithContentDescription("Show/Hide History").performClick()
 
         // verify the list is dismissed
-        rule.onNodeWithTag("history list")
-            .assertIsDisplayed()
-            .onChildren()
-            .assertCountEquals(0)
+        rule.onNodeWithTag("history list").assertDoesNotExist()
 
         confirmVerified(showWordDetail)
     }

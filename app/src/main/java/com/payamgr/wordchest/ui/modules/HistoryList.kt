@@ -1,12 +1,12 @@
 package com.payamgr.wordchest.ui.modules
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,17 +46,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.payamgr.wordchest.ui.preview.ThemesPreview
 import com.payamgr.wordchest.ui.theme.WordChestTheme
+import kotlinx.coroutines.delay
 
 @ThemesPreview
 @Composable
 fun HistoryList_Preview() {
     WordChestTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            val list = List(10) { it.toString() } + listOf("a\nb", "a".repeat(20))
+//            val list = List(10) { it.toString() } + listOf("a\nb", "a".repeat(20))
+//            var list by remember { mutableStateOf(List(3) { it.toString() } + listOf("a\nb", "a".repeat(20))) }
+            var list by remember { mutableStateOf(listOf<String>()) }
             var expand by remember { mutableStateOf(true) }
-            Column(
-                modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer)
-            ) {
+            Column(modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer)) {
                 FloatingActionButton(
                     shape = CircleShape,
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -65,9 +69,32 @@ fun HistoryList_Preview() {
                         contentDescription = "History",
                     )
                 }
+                FloatingActionButton(
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    onClick = { list = list + "Item ${list.size}" },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "add",
+                    )
+                }
+                FloatingActionButton(
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    onClick = { list = list.dropLast(1) },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Remove,
+                        contentDescription = "remove",
+                    )
+                }
                 History.List(
                     expand = expand,
-                    list = list, 2,
+                    list = list.reversed(),
+                    currentLayer = 2,
                     onItemClicked = {},
                     modifier = Modifier
                         .fillMaxWidth(fraction = .5f)
@@ -78,11 +105,10 @@ fun HistoryList_Preview() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 object History {
-    private const val ANIMATION_DURATION = 200
+    private const val ANIMATION_DELAY = 100
+    private const val ENTER_ANIMATION_DURATION = 300
     private const val EXIT_ANIMATION_DURATION = 500
-    private const val ANIMATION_DELAY = 20
 
     enum class ItemState { Previous, Current, Next }
 
@@ -94,30 +120,43 @@ object History {
         onItemClicked: (layer: Int) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = 4.dp),
-            reverseLayout = true,
-            modifier = modifier.testTag("history list")
+        val animationDelayPerUnit = list.rememberAnimationDelayPerUnit()
+        var expand2 by remember { mutableStateOf(false) }
+        LaunchedEffect(expand) {
+            delay(10)
+            expand2 = expand
+        }
+        AnimatedVisibility(
+            visible = expand,
+            enter = fadeIn(animationSpec = tween(1)),
+            exit = fadeOut(tween(delayMillis = ANIMATION_DELAY + EXIT_ANIMATION_DURATION)),
+            modifier = modifier.animateContentSize(tween(ENTER_ANIMATION_DURATION))
         ) {
-            itemsIndexed(list, { _, it -> it }) { index, it ->
-                val animationDelay = index * ANIMATION_DELAY
-                AnimatedVisibility(
-                    visible = expand,
-                    enter = slideInHorizontally(
-                        initialOffsetX = { w -> -w },
-                        animationSpec = tween(ANIMATION_DURATION, animationDelay),
-                    ) + fadeIn(animationSpec = tween(ANIMATION_DURATION, animationDelay)),
-                    exit = slideOutHorizontally(
-                        targetOffsetX = { w -> -w },
-                        animationSpec = tween(EXIT_ANIMATION_DURATION)
-                    ) + fadeOut(animationSpec = tween(EXIT_ANIMATION_DURATION)),
-                    modifier = Modifier.animateItemPlacement()
-                ) {
-                    Item(
-                        data = it,
-                        state = stateOf(index, list.size - 1 - currentLayer),
-                        onClick = { onItemClicked(list.size - 1 - index) },
-                    )
+            LazyColumn(
+                contentPadding = PaddingValues(vertical = 4.dp),
+                reverseLayout = true,
+                modifier = Modifier.testTag("history list")
+            ) {
+                itemsIndexed(list, { _, it -> it }) { index, it ->
+                    val animationDelay = index * animationDelayPerUnit
+                    AnimatedVisibility(
+                        visible = expand2,
+                        enter = slideInHorizontally(
+                            initialOffsetX = { w -> -w },
+                            animationSpec = tween(ENTER_ANIMATION_DURATION, animationDelay),
+                        ) + fadeIn(animationSpec = tween(ENTER_ANIMATION_DURATION, animationDelay)),
+                        exit = slideOutHorizontally(
+                            targetOffsetX = { w -> -w },
+                            animationSpec = tween(EXIT_ANIMATION_DURATION, animationDelay),
+                        ) + fadeOut(animationSpec = tween(EXIT_ANIMATION_DURATION, animationDelay)),
+//                        modifier = Modifier.animateItemPlacement()
+                    ) {
+                        Item(
+                            data = it,
+                            state = stateOf(index, list.size - 1 - currentLayer),
+                            onClick = { onItemClicked(list.size - 1 - index) },
+                        )
+                    }
                 }
             }
         }
@@ -165,5 +204,10 @@ object History {
                     .fillMaxWidth()
             )
         }
+    }
+
+    @Composable
+    private fun List<String>.rememberAnimationDelayPerUnit() = remember(size) {
+        size.let { if (it < 1) 1 else it - 1 }.let { ANIMATION_DELAY / it }
     }
 }
