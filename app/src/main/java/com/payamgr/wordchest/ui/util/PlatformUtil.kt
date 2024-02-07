@@ -2,6 +2,7 @@
 
 package com.payamgr.wordchest.ui.util
 
+import android.os.Build
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,3 +33,5 @@ fun rememberHidableBottomSheetScaffoldState() = rememberBottomSheetScaffoldState
         initialValue = SheetValue.Hidden,
     )
 )
+
+val isAndroidSdk31plus = Build.VERSION.SDK_INT >= 31

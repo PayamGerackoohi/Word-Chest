@@ -15,3 +15,7 @@
 local.properties
 
 .idea
+
+keystore/
+/scripts/env
+Icon?

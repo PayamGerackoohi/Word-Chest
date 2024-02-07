@@ -1,8 +1,12 @@
 package com.payamgr.wordchest.ui.page.home
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertCountEquals
@@ -16,23 +20,23 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.Espresso
 import androidx.test.filters.MediumTest
 import com.airbnb.mvrx.mocking.MockableMavericks
 import com.payamgr.wordchest.data.model.Word
-import com.payamgr.wordchest.data.state.HomeState
+import com.payamgr.wordchest.ui.theme.WordChestTheme
 import com.payamgr.wordchest.util.FakeHomeViewModel
+import com.payamgr.wordchest.util.Screenshot
 import com.payamgr.wordchest.util.app
 import com.payamgr.wordchest.util.assertHasRole
+import com.payamgr.wordchest.util.take
 import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+
 
 @MediumTest
 class HomeTest {
@@ -60,7 +64,9 @@ class HomeTest {
         val inputTag = "word input"
         var key by mutableStateOf("aaa")
 
-        rule.setContent { Home.WordInput(search = key, onSearchChanged = { key = it }) }
+        rule.setContent {
+            Home.WordInput(search = key, onSearchChanged = { key = it })
+        }
 
         // Check if 'aaa' is displayed
         rule.onNodeWithTag(inputTag)
@@ -122,7 +128,16 @@ class HomeTest {
         justRun { onItemClick(any()) }
         MockableMavericks.initialize(app)
         val viewModel = FakeHomeViewModel()
-        rule.setContent { Home.Page(viewModel = viewModel, onItemClick = onItemClick) }
+        rule.setContent {
+            WordChestTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Home.Page(viewModel = viewModel, onItemClick = onItemClick)
+                }
+            }
+        }
 
         // I) Initial state check
         // Check if the appBar is displayed
@@ -155,7 +170,12 @@ class HomeTest {
                 get(2).assertContentDescriptionEquals("abc-3: abcabcabc").performClick()
                 verify { onItemClick("abc-3") }
             }
-
         confirmVerified(onItemClick)
+
+        // Hide the keyboard
+        Espresso.pressBack()
+        rule.waitForIdle()
+
+        Screenshot.Home.take()
     }
 }

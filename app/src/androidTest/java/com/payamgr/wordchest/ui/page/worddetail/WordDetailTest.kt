@@ -1,8 +1,12 @@
 package com.payamgr.wordchest.ui.page.worddetail
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assert
@@ -22,12 +26,10 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.test.filters.MediumTest
@@ -37,10 +39,13 @@ import com.payamgr.wordchest.data.model.Word
 import com.payamgr.wordchest.data.model.WordKey
 import com.payamgr.wordchest.data.model.fake.FakeWord
 import com.payamgr.wordchest.data.state.WordDetailState
+import com.payamgr.wordchest.ui.theme.WordChestTheme
 import com.payamgr.wordchest.util.FakeWordData
 import com.payamgr.wordchest.util.FakeWordDetailViewModel
+import com.payamgr.wordchest.util.Screenshot
 import com.payamgr.wordchest.util.app
 import com.payamgr.wordchest.util.assertHasRole
+import com.payamgr.wordchest.util.take
 import io.mockk.called
 import io.mockk.confirmVerified
 import io.mockk.justRun
@@ -371,22 +376,32 @@ class WordDetailTest {
     fun page_initialState_check() {
         MockableMavericks.initialize(app)
         rule.setContent {
-            WordDetail.Page(
-                { _ -> },
-                FakeWordDetailViewModel(WordDetailState(data = FakeWordData.dataList))
-            )
+            WordChestTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    WordDetail.Page(
+                        { _ -> },
+                        FakeWordDetailViewModel(WordDetailState(data = FakeWord().wordData))
+                    )
+                }
+            }
         }
 
         rule.onNodeWithTag("word data list")
             .onChildren()
-            .assertCountEquals(2)
+            .assertCountEquals(3)
             .apply {
-                onFirst().assert(hasTestTag("word data"))
+                this[0].assert(hasTestTag("word data"))
                 this[1].assert(hasTestTag("word section"))
+                this[2].assert(hasTestTag("word section"))
             }
         rule.onNodeWithTag("search section")
             .assertExists()
             .assertIsNotDisplayed()
+
+        Screenshot.WordDetail.take()
     }
 
     @Test
@@ -394,11 +409,21 @@ class WordDetailTest {
         MockableMavericks.initialize(app)
         val showWordDetail = mockk<(WordKey) -> Unit>()
         justRun { showWordDetail(any()) }
+        val fakeWord = FakeWord()
+        fakeWord.incrementIndex()
+
         rule.setContent {
-            WordDetail.Page(
-                showWordDetail = showWordDetail,
-                viewModel = FakeWordDetailViewModel(WordDetailState(data = FakeWordData.dataList)),
-            )
+            WordChestTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    WordDetail.Page(
+                        showWordDetail = showWordDetail,
+                        viewModel = FakeWordDetailViewModel(WordDetailState(data = fakeWord.wordData)),
+                    )
+                }
+            }
         }
 
         // verify initial state
@@ -407,18 +432,19 @@ class WordDetailTest {
             .assertIsNotDisplayed()
 
         // click on 'ccc' and verify
-        rule.onNodeWithText("ccc ddd")
+        rule.onNodeWithText("Vibrations that travel through", true)
             .assertIsDisplayed()
+            .assert(hasTestTag("section value"))
             .performTouchInput { click(Offset.Zero) }
 
         // verify the search section is partially open
         rule.onNodeWithTag("word input")
             .assertIsDisplayed()
-            .assertTextEquals("ccc")
+            .assertTextEquals("Vibrations")
         rule.onAllNodesWithTag("search section item")
             .assertCountEquals(3)
             .onFirst()
-            .assertContentDescriptionEquals("ccc - 1")
+            .assertContentDescriptionEquals("Vibrations - 1")
             .assertExists()
             .assertIsNotDisplayed()
 
@@ -431,15 +457,17 @@ class WordDetailTest {
         rule.onAllNodesWithTag("search section item")
             .assertCountEquals(3)
             .onLast()
-            .assertContentDescriptionEquals("ccc - 3")
+            .assertContentDescriptionEquals("Vibrations - 3")
             .assertExists()
             .assertIsDisplayed()
 
+        Screenshot.WordDetail_SearchSection.take()
+
         // click on 'ccc - 2' item
-        rule.onNodeWithContentDescription("ccc - 2").performClick()
+        rule.onNodeWithContentDescription("Vibrations - 2").performClick()
 
         // verify the 'showWordDetail' is called
-        verify { showWordDetail(WordKey.Word("ccc - 2")) }
+        verify { showWordDetail(WordKey.Word("Vibrations - 2")) }
 
         // swipe down the search section
         rule.onNodeWithTag("search section")
@@ -457,12 +485,34 @@ class WordDetailTest {
         MockableMavericks.initialize(app)
         val showWordDetail = mockk<(WordKey) -> Unit>()
         justRun { showWordDetail(any()) }
-        rule.setContent {
-            WordDetail.Page(
-                showWordDetail = showWordDetail,
-                FakeWordDetailViewModel(WordDetailState(historyList = listOf("aaa", "bbb", "ccc")))
-            )
+        val fakeWord = FakeWord().apply {
+            incrementIndex()
+            incrementIndex()
         }
+
+        rule.setContent {
+            WordChestTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    WordDetail.Page(
+                        showWordDetail = showWordDetail,
+                        FakeWordDetailViewModel(
+                            WordDetailState(
+                                data = fakeWord.wordData,
+                                historyList = listOf(
+                                    "example",
+                                    "hour",
+                                    "unique"
+                                )
+                            )
+                        )
+                    )
+                }
+            }
+        }
+
         // verify initial state
         rule.onNodeWithContentDescription("Show/Hide History").assertIsDisplayed()
         rule.onNodeWithTag("history list").assertDoesNotExist()
@@ -478,13 +528,15 @@ class WordDetailTest {
             .onChildren()
             .assertCountEquals(3)
             .apply {
-                onFirst().assertTextEquals("aaa").assertContentDescriptionEquals("Next: aaa")
-                this[1].assertTextEquals("bbb").assertContentDescriptionEquals("Next: bbb")
-                onLast().assertTextEquals("ccc").assertContentDescriptionEquals("Current: ccc")
+                this[0].assertTextEquals("example").assertContentDescriptionEquals("Next: example")
+                this[1].assertTextEquals("hour").assertContentDescriptionEquals("Next: hour")
+                this[2].assertTextEquals("unique").assertContentDescriptionEquals("Current: unique")
             }
 
+        Screenshot.WordDetail_History.take()
+
         // click on 'bbb'
-        rule.onNodeWithContentDescription("Next: bbb").performClick()
+        rule.onNodeWithContentDescription("Next: hour").performClick()
 
         // verify showWordDetail wants to open layer 1
         verify { showWordDetail(WordKey.Layer(1)) }
@@ -501,7 +553,7 @@ class WordDetailTest {
             .onChildren()
             .assertCountEquals(3)
             .onFirst()
-            .assertTextEquals("aaa")
+            .assertTextEquals("example")
 
         // close the history list
         rule.onNodeWithContentDescription("Show/Hide History").performClick()

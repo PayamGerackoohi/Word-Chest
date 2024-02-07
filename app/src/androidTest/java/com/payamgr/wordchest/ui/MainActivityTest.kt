@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildren
@@ -32,12 +33,22 @@ class MainActivityTest {
 
     @Test
     fun home_initialState_check() {
+        // For for the splashscreen animation to end
+        rule.waitUntil {
+            rule.onAllNodesWithText("Word Search").fetchSemanticsNodes().isNotEmpty()
+        }
+
         rule.onNodeWithText("Word Search").assertIsDisplayed()
     }
 
     @Test
     fun navigation_homeToDetails_check() {
         rule.apply {
+            // For for the splashscreen animation to end
+            waitUntil {
+                onAllNodesWithText("Word Search").fetchSemanticsNodes().isNotEmpty()
+            }
+
             // check initial state
             onNodeWithText("Word Search")
                 .assertExists()
@@ -91,6 +102,11 @@ class MainActivityTest {
 
     @Test
     fun navigationAndPop_WordDetailsToWordDetails_Test() {
+        // For for the splashscreen animation to end
+        rule.waitUntil {
+            rule.onAllNodesWithTag("word input").fetchSemanticsNodes().isNotEmpty()
+        }
+
         // open details page
         rule.onNodeWithTag("word input").performTextInput("aaa")
 
@@ -195,6 +211,12 @@ class MainActivityTest {
 
     @Test
     fun home_clickOnSelectLanguage_showsError() {
+        // For for the splashscreen animation to end
+        rule.waitUntil {
+            rule.onAllNodesWithContentDescription("Select Language").fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
         rule.onNodeWithContentDescription("Select Language")
             .assertIsDisplayed()
             .performClick()

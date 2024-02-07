@@ -3,4 +3,8 @@
     <string name="word_search">Word Search</string>
     <string name="show_word_detail">Show word detail</string>
     <string name="not_implemented_yet">Not implemented yet!</string>
+    <string name="splashscreen">Splashscreen</string>
+    <string name="splashscreen_icon">Splashscreen Icon</string>
+    <string name="beginning">Beginning</string>
+    <string name="end">End</string>
 </resources>

@@ -77,7 +77,7 @@ class FakeWord @Inject constructor() {
         )
     )
 
-    private fun incrementIndex() {
+    fun incrementIndex() {
         val i = index + 1
         index = if (i >= keys.size) 0 else i
     }
