@@ -65,6 +65,6 @@ The results are stored in the `./docs/screenshots` directory.
   - [x] History of Searches
 - [ ] Word Reminder
 - [ ] Language Selection
-- [ ] Screenshot improvement
-  - [ ] Home page soft keyboard should completely hide
-  - [ ] Screenshots have actionbar and are not adhering to the app theme
+- [x] Screenshot improvement
+  - [x] Home page soft keyboard should completely hide
+  - [x] Screenshots should not have actionbars

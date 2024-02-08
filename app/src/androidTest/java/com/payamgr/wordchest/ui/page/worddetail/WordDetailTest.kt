@@ -39,6 +39,7 @@ import com.payamgr.wordchest.data.model.Word
 import com.payamgr.wordchest.data.model.WordKey
 import com.payamgr.wordchest.data.model.fake.FakeWord
 import com.payamgr.wordchest.data.state.WordDetailState
+import com.payamgr.wordchest.ui.modules.ActivityTest
 import com.payamgr.wordchest.ui.theme.WordChestTheme
 import com.payamgr.wordchest.util.FakeWordData
 import com.payamgr.wordchest.util.FakeWordDetailViewModel
@@ -371,7 +372,10 @@ class WordDetailTest {
             .onChildren()
             .assertCountEquals(3)
     }
+}
 
+@MediumTest
+class WordDetailActivityTest : ActivityTest() {
     @Test
     fun page_initialState_check() {
         MockableMavericks.initialize(app)

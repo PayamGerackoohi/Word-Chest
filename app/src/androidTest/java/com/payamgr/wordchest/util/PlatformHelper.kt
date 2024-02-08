@@ -3,8 +3,11 @@ package com.payamgr.wordchest.util
 import android.app.UiAutomation
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.core.graphics.scale
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import kotlin.math.min
@@ -66,3 +69,7 @@ private fun getTargetDimensions(minDimension: Int, width: Int, height: Int) = if
     minDimension to minDimension * height / width
 else
     minDimension * width / height to minDimension
+
+fun AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, *>.hideActionBar() {
+    activityRule.scenario.onActivity { it.actionBar?.hide() }
+}

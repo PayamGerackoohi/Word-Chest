@@ -24,6 +24,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.filters.MediumTest
 import com.airbnb.mvrx.mocking.MockableMavericks
 import com.payamgr.wordchest.data.model.Word
+import com.payamgr.wordchest.ui.modules.ActivityTest
 import com.payamgr.wordchest.ui.theme.WordChestTheme
 import com.payamgr.wordchest.util.FakeHomeViewModel
 import com.payamgr.wordchest.util.Screenshot
@@ -36,7 +37,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Rule
 import org.junit.Test
-
 
 @MediumTest
 class HomeTest {
@@ -121,13 +121,17 @@ class HomeTest {
 
         confirmVerified(onItemClick)
     }
+}
 
+@MediumTest
+class HomeActivityTest : ActivityTest() {
     @Test
     fun pageTest() {
         val onItemClick = mockk<(String) -> Unit>()
         justRun { onItemClick(any()) }
         MockableMavericks.initialize(app)
         val viewModel = FakeHomeViewModel()
+
         rule.setContent {
             WordChestTheme {
                 Surface(
@@ -170,12 +174,10 @@ class HomeTest {
                 get(2).assertContentDescriptionEquals("abc-3: abcabcabc").performClick()
                 verify { onItemClick("abc-3") }
             }
+
         confirmVerified(onItemClick)
 
-        // Hide the keyboard
-        Espresso.pressBack()
-        rule.waitForIdle()
-
+        Espresso.closeSoftKeyboard()
         Screenshot.Home.take()
     }
 }
